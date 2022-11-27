@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yahelei.dao.mysql.autotest.CaseExecuteLogMapper">
+
+	<resultMap id="CaseExecuteLoginfo" type="com.yahelei.domain.autotest.CaseExecuteLogBean" >
+		<result column="id" property="id" jdbcType="INTEGER"/>
+		<result column="sum" property="sum" jdbcType="INTEGER"/>
+		<result column="success" property="success" jdbcType="INTEGER"/>
+		<result column="path" property="path" jdbcType="VARCHAR"/>
+		<result column="labelId" property="labelId" jdbcType="VARCHAR"/>
+		<result column="projectId" property="projectId" jdbcType="VARCHAR"/>
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP"/>
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP"/>
+		<result column="env" property="env" jdbcType="VARCHAR"/>
+		<result column="description" property="description" jdbcType="VARCHAR"/>
+		<result column="interfaceId" property="interfaceId" jdbcType="VARCHAR"/>
+		<result column="responseResult" property="responseResult" jdbcType="VARCHAR"/>
+		<result column="url" property="url" jdbcType="VARCHAR"/>
+		<result column="taskname" property="taskname" jdbcType="VARCHAR"/>
+		<result column="serialId" property="serialId" jdbcType="INTEGER"/>
+		<result column="caseId" property="caseId" jdbcType="INTEGER"/>
+		<result column="taskId" property="taskId" jdbcType="INTEGER"/>
+		<result column="parameters" property="parameters" jdbcType="VARCHAR"/>
+		<result column="expectedResult" property="expectedResult" jdbcType="VARCHAR"/>
+		<result column="result" property="result" jdbcType="BOOLEAN"/>
+		<result column="execTime" property="execTime" jdbcType="BIGINT"/>
+		<result column="header" property="header" jdbcType="VARCHAR"/>
+		<result column="taskowner" property="taskowner" jdbcType="VARCHAR"/>
+		<result column="taskdescription" property="taskdescription" jdbcType="VARCHAR"/>
+		<result column="taskcreator" property="taskcreator" jdbcType="VARCHAR"/>
+		<result column="casedescription" property="casedescription" jdbcType="VARCHAR"/>
+		<result column="precondition" property="precondition" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<insert id="add" parameterType="com.yahelei.domain.autotest.CaseExecuteLogBean">
+		insert into yahelei2.yahelei_caseexecutelog(caseId,header,precondition,path,labelId,url,projectId,interfaceId,
+		                                           env,responseResult,parameters,expectedResult,execTime
+		                                           ,result,taskId,serialId,description)
+		values(#{caseId},#{header},#{precondition},#{path},#{labelId}, #{url}, #{projectId},#{interfaceId},
+		       #{env},#{responseResult},#{parameters},#{expectedResult},#{execTime}
+			  ,#{result},#{taskId},#{serialId},#{description})
+	</insert>
+	<select id="getlistbycaseid" parameterType="com.yahelei.domain.autotest.CaseExecuteLogBean"  resultMap="CaseExecuteLoginfo">
+		select * from yahelei2.yahelei_caseexecutelog
+		where  1=1
+		<if test="caseId != null and caseId!=-1">
+			AND caseId =#{caseId}
+		</if>
+		<if test="projectId != null and projectId.length()>=1">
+			AND projectId =#{projectId}
+		</if>
+		<if test="interfaceId != null and interfaceId.length()>=1">
+			AND interfaceId =#{interfaceId}
+		</if>
+		order by update_time DESC
+	</select>
+	<select id="getlist" resultMap="CaseExecuteLoginfo">
+		select serialId,count(case when result=1 then 1 end) as success,count(*) as sum,taskId,
+		min(create_time) as create_time  from yahelei2.yahelei_caseexecutelog a
+		where serialId!=-1
+		<if test="taskId != -2">
+			AND taskId =#{taskId}
+		</if>
+		<if test="serialId != -1">
+			AND serialId =#{serialId}
+		</if>
+		GROUP by serialId,taskId order by create_time desc limit #{begin},#{pagecount}
+	</select>
+	<select id="getsum" resultType="java.lang.Integer">
+		select distinct serialId from yahelei2.yahelei_caseexecutelog
+		where
+		1=1
+		<if test="taskId != -2">
+			AND taskId =#{taskId}
+		</if>
+		<if test="serialId != -1">
+			AND serialId =#{serialId}
+		</if>
+	</select>
+	<select id="getsuccess" resultType="java.lang.Integer">
+		select count(*) as success from yahelei2.yahelei_caseexecutelog
+		where serialid =#{serialId} and result=1
+	</select>
+	<select id="getdetail" resultMap="CaseExecuteLoginfo">
+		select a.*,b.description as casedescription
+		from yahelei2.yahelei_caseexecutelog a,yahelei2.yahelei_case b where
+			a.serialId =${serialId} and a.caseId=b.id
+		order by a.create_time
+	</select>
+	<select id="getdetailjenkins" resultMap="CaseExecuteLoginfo">
+		select a.*,b.description as casedescription
+		from yahelei2.yahelei_caseexecutelog a,yahelei2.yahelei_case b where
+			a.serialId =#{serialId} and a.caseId=b.id
+		order by a.create_time
+	</select>
+	<select id="gettaskid" resultType="java.lang.Integer">
+		select distinct taskId from yahelei2.yahelei_caseexecutelog where serialId =#{serialId}
+	</select>
+</mapper>

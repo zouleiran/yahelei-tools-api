@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yahelei.dao.mysql.autotest.AddressMapper">
+
+	<resultMap id="addressinfo" type="com.yahelei.domain.autotest.AddressBean" >
+		<result column="id" property="id" jdbcType="INTEGER"/>
+		<result column="type" property="type" jdbcType="VARCHAR"/>
+		<result column="url" property="url" jdbcType="VARCHAR"/>
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP"/>
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP"/>
+		<result column="port" property="port" jdbcType="VARCHAR"/>
+		<result column="username" property="username" jdbcType="VARCHAR"/>
+		<result column="description" property="description" jdbcType="VARCHAR"/>
+		<result column="updateperson" property="updateperson" jdbcType="VARCHAR"/>
+		<result column="password" property="password" jdbcType="VARCHAR"/>
+	</resultMap>
+	<select id="getAddressList" parameterType="java.util.Map"  resultMap="addressinfo">
+		select * from yahelei2.yahelei_address
+		where 1=1
+		<if test="url != null and url.length()>0">
+			AND url like CONCAT('%',#{url},'%')
+		</if>
+		<if test="description != null and description.length()>0">
+			AND description =#{description}
+		</if>
+		<if test="type != null and type.length()>0">
+			AND type =#{type}
+		</if>
+		order by update_time DESC
+	</select>
+	<select id="getAddressbyid" resultMap="addressinfo">
+		select * from yahelei2.yahelei_address
+		where id=#{value}
+	</select>
+	<delete id="deleteaddress" parameterType="java.lang.Integer">
+		delete from yahelei2.yahelei_address
+		where id=#{id}
+	</delete>
+	<insert id="insertaddress" parameterType="com.yahelei.domain.autotest.AddressBean">
+		insert into yahelei2.yahelei_address(type,url,port,username,password,description)
+		values(#{type},#{url},#{port},#{username},#{password},#{description})
+	</insert>
+	<update id="updateaddress" parameterType="com.yahelei.domain.autotest.AddressBean">
+		UPDATE yahelei2.yahelei_address
+		SET type = #{type},
+		url = #{url},
+		port = #{port},
+		username = #{username},
+		<if test="password != null and password!=-1">
+			password =#{password},
+		</if>
+		description = #{description},
+		update_time=now()
+		WHERE id = #{id}
+	</update>
+
+	<select id="getDatabaseAddressbyid" resultMap="addressinfo">
+		select * from yahelei2.yahelei_address
+		where id=#{value} and type="sql"
+	</select>
+
+
+	<select id="getDatabaseTableName" resultMap="addressinfo">
+		select * from yahelei2.yahelei_address
+		where id=#{value} and type="sql"
+	</select>
+
+</mapper>

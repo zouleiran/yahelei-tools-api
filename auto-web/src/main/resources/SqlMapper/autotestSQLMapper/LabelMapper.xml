@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yahelei.dao.mysql.autotest.LabelMapper">
+
+	<resultMap id="Labelinfo" type="com.yahelei.domain.autotest.LabelBean" >
+		<result column="id" property="id" jdbcType="INTEGER"/>
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP"/>
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP"/>
+		<result column="caseCount" property="caseCount" jdbcType="INTEGER"/>
+		<result column="paramlabel" property="paramlabel" jdbcType="VARCHAR"/>
+		<result column="host" property="host" jdbcType="VARCHAR"/>
+		<result column="projectId" property="projectId" jdbcType="VARCHAR"/>
+		<result column="description" property="description" jdbcType="VARCHAR"/>
+	</resultMap>
+	<select id="getLabelListbyjenkins" parameterType="java.util.Map"  resultMap="Labelinfo">
+		select * from yahelei2.yahelei_label a,yahelei2.yahelei_project b where
+		        b.id=a.projectId and a.description=#{description}
+	</select>
+	<select id="getLabelList" parameterType="java.util.Map"  resultMap="Labelinfo">
+		select * from yahelei2.yahelei_label
+		where 1=1
+		<if test="description != null and description.length()>0">
+			AND description =#{description}
+		</if>
+		<if test="projectId != null and projectId.length()>0">
+			AND projectId =#{projectId}
+		</if>
+		order by update_time DESC
+	</select>
+	<select id="getdetailbyid" parameterType="java.lang.String" resultMap="Labelinfo">
+		select * from yahelei2.yahelei_label
+		where id=#{id}
+	</select>
+	<select id="getLabellist2"  resultMap="Labelinfo">
+		select * from yahelei_label where id in ( select LabelId from yahelei2.yahelei_caseexecutelog a
+				where LabelId!=-1 group by LabelId)
+	</select>
+	<delete id="deleteLabel" parameterType="java.lang.Integer">
+		delete from yahelei2.yahelei_label
+		where id=#{id}
+	</delete>
+	<insert id="insertlabel" useGeneratedKeys="true" keyProperty="id"
+			parameterType="com.yahelei.domain.autotest.LabelBean">
+		insert into yahelei2.yahelei_label(projectId,caseCount,create_time,paramlabel,host,update_time,description,caselist)
+		values(#{projectId},#{caseCount},now(),#{paramlabel},#{host},now(),#{description},#{caselist})
+	</insert>
+	<update id="updatelabel" parameterType="com.yahelei.domain.autotest.LabelBean">
+		UPDATE yahelei2.yahelei_label
+		SET projectId = #{projectId},
+			caselist = #{caselist},
+			caseCount = #{caseCount},
+			paramlabel = #{paramlabel},
+			host = #{host},
+			description = #{description},
+			update_time=now()
+		WHERE id = #{id}
+	</update>
+
+	<update id="reduceLabel" >
+		update yahelei2.yahelei_label set caseCount=caseCount-1 ,caselist =#{caselist} where id =#{labelid}
+	</update>
+	<update id="addLabel" >
+		update yahelei2.yahelei_label set caseCount=caseCount+1 ,caselist =#{caselist} where id =#{labelid}
+	</update>
+</mapper>

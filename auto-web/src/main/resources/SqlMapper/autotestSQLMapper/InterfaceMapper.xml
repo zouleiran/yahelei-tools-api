@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yahelei.dao.mysql.autotest.InterfaceMapper">
+
+	<resultMap id="Interfacelist" type="com.yahelei.domain.autotest.InterfaceBean" >
+		<result column="id" property="id" jdbcType="INTEGER"/>
+		<result column="project_id" property="project_id" jdbcType="VARCHAR"/>
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP"/>
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP"/>
+		<result column="url" property="url" jdbcType="VARCHAR"/>
+		<result column="projectdes" property="projectdes" jdbcType="VARCHAR"/>
+		<result column="method" property="method" jdbcType="VARCHAR"/>
+		<result column="description" property="description" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<select id="getdetailbyInterfaceid" parameterType="String"  resultMap="Interfacelist">
+		select a.*,b.description as projectdes from yahelei2.yahelei_interface a,yahelei2.yahelei_project b
+		where a.project_id=b.id and a.id=#{interfaceId}
+	</select>
+	<select id="getInterfacelist" parameterType="String"  resultMap="Interfacelist">
+		select * from yahelei2.yahelei_interface
+		where 1=1
+		<if test="url != null and url.length()!=0">
+			AND url like CONCAT('%',#{url},'%')
+		</if>
+		<if test="project_id != null and project_id.length()!=0">
+			AND project_id = #{project_id}
+		</if>
+		<if test="description != null and description.length()!=0">
+			AND description like CONCAT('%',#{description},'%')
+		</if>
+		order by update_time desc
+	</select>
+	<select id="getInterfacelistequal" parameterType="String"  resultMap="Interfacelist">
+		select * from yahelei2.yahelei_interface
+		where 1=1
+		<if test="url != null and url.length()!=0">
+			AND url =#{url}
+		</if>
+		<if test="project_id != null and project_id.length()!=0">
+			AND project_id = #{project_id}
+		</if>
+		order by update_time desc
+	</select>
+	<delete id="deleteInterface" parameterType="java.lang.Integer">
+		delete from yahelei2.yahelei_interface
+		where id=#{interfaceId}
+	</delete>
+	<insert id="insertInterface" parameterType="com.yahelei.domain.autotest.InterfaceBean" keyProperty="id" useGeneratedKeys="true">
+		insert into yahelei2.yahelei_interface(url,project_id,description,method)
+		values(#{url}, #{project_id}, #{description}, #{method})
+	</insert>
+	<update id="updateInterface" parameterType="com.yahelei.domain.autotest.InterfaceBean">
+		UPDATE yahelei2.yahelei_interface
+		SET
+		url=#{url},
+		method = #{method},
+		description = #{description},
+		update_time=now()
+		WHERE id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yahelei.dao.mysql.autotest.TaskMapper">
+	<resultMap id="Taskinfo" type="com.yahelei.domain.autotest.TaskBean" >
+		<result column="id" property="id" jdbcType="INTEGER"/>
+		<result column="type" property="type" jdbcType="VARCHAR"/>
+		<result column="value" property="value" jdbcType="VARCHAR"/>
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP"/>
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP"/>
+		<result column="description" property="description" jdbcType="VARCHAR"/>
+		<result column="common_header" property="common_header" jdbcType="VARCHAR"/>
+		<result column="param" property="param" jdbcType="VARCHAR"/>
+		<result column="host" property="host" jdbcType="VARCHAR"/>
+		<result column="email" property="email" jdbcType="VARCHAR"/>
+		<result column="projectId" property="projectId" jdbcType="VARCHAR"/>
+		<result column="creator" property="creator" jdbcType="VARCHAR"/>
+	</resultMap>
+	<resultMap id="Ainfo" type="com.yahelei.domain.autotest.A" >
+		<result column="id" property="id" jdbcType="INTEGER"/>
+		<result column="biaoji" property="biaoji" jdbcType="BOOLEAN"/>
+		<result column="description" property="description" jdbcType="VARCHAR"/>
+	</resultMap>
+	<select id="gettaskjenkins" parameterType="String"  resultMap="Taskinfo">
+		select * FROM yahelei2.yahelei_task where env=#{env} and mark=#{mark}
+	</select>
+	<select id="gettaskbyid" parameterType="String"  resultMap="Taskinfo">
+		select * FROM yahelei2.yahelei_task where id=#{task_id}
+	</select>
+	<select id="gettaskList" parameterType="String"  resultMap="Taskinfo">
+		select * FROM yahelei2.yahelei_task where 1=1
+		<if test="type != null and type.length()>0">
+			AND type =#{type}
+		</if>
+		<if test="description != null and description.length()>2">
+			AND description like #{description}
+		</if>
+		order by update_time DESC
+	</select>
+	<insert id="inserttask" parameterType="com.yahelei.domain.autotest.TaskBean">
+		insert into yahelei2.yahelei_task(description,projectId,create_time,update_time,type,value,host,param,common_header,email)
+		values(#{description},#{projectId},now(),now(),#{type},#{value},#{host},#{param},#{common_header},#{email})
+	</insert>
+	<update id="updatetask" parameterType="com.yahelei.domain.autotest.TaskBean">
+		UPDATE yahelei2.yahelei_task
+		SET common_header = #{common_header},
+			projectId=#{projectId},
+			param = #{param},
+			host=#{host},
+			value = #{value},
+			description = #{description},
+			type = #{type},
+			update_time=now(),
+			email=#{email}
+		WHERE id = #{id}
+	</update>
+	<select id="getexectasklist" parameterType="String"  resultMap="Taskinfo">
+		select * from yahelei2.yahelei_task where id in
+			(select DISTINCT taskId from yahelei_sceneexecutelog where taskId!=-1)
+	</select>
+
+	<select id="getListProject" resultMap="Ainfo">
+		select id,description from yahelei2.yahelei_project
+	</select>
+	<select id="getListInterface" resultMap="Ainfo">
+		select a.id,CONCAT(b.description,'---',a.description) as description from
+	yahelei2.yahelei_interface a,yahelei2.yahelei_project b where a.project_id=b.id and a.project_id=#{project_id}
+	</select>
+	<select id="getListCase" resultMap="Ainfo">
+		select c.id,CONCAT(b.description,'---',a.description,'---',c.description) as description from
+	yahelei2.yahelei_interface a,yahelei2.yahelei_project b,yahelei2.yahelei_case c where a.project_id=b.id and a.id=c.`Interface_id`  and a.project_id=#{project_id}
+	</select>
+	<select id="getlabel" resultMap="Ainfo">
+		select a.id,CONCAT(b.description,'---',a.description) as description from yahelei2.yahelei_label a,yahelei2.yahelei_project b
+		where a.projectId=b.id and a.projectId=#{project_id}
+	</select>
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yahelei.dao.mysql.autotest.ParameterMapper">
+
+	<resultMap id="paraminfo" type="com.yahelei.domain.autotest.ParameterBean" >
+		<result column="id" property="id" jdbcType="INTEGER"/>
+		<result column="name" property="name" jdbcType="VARCHAR"/>
+		<result column="value" property="value" jdbcType="VARCHAR"/>
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP"/>
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP"/>
+		<result column="description" property="description" jdbcType="VARCHAR"/>
+	</resultMap>
+	<select id="getParameterList" parameterType="String"  resultMap="paraminfo">
+	   select * from yahelei2.yahelei_param
+	   where 1=1
+		<if test="name != null and name.length()>2">
+			AND name like #{name}
+		</if>
+		<if test="description != null and description.length()>2">
+			AND description like #{description}
+		</if>
+	    order by update_time DESC
+	</select>
+	<select id="getParameterListbyname" parameterType="String"  resultMap="paraminfo">
+		select * from yahelei2.yahelei_param
+		where 1=1
+		<if test="name != null and name.length()>0">
+			AND name = #{name}
+		</if>
+		order by update_time DESC
+	</select>
+	<select id="getvalue" parameterType="String"  resultType="String">
+		select value from yahelei2.yahelei_param
+		where name = #{name}
+	</select>
+	<select id="getParameterdetail" parameterType="String"  resultMap="paraminfo">
+		select * from yahelei2.yahelei_param
+		where id = #{id}
+	</select>
+	<update id="updateParameter" parameterType="com.yahelei.domain.autotest.ParameterBean">
+		update yahelei2.yahelei_param set
+		value=#{value},description =#{description},name =#{name},update_time=now()
+		where id = #{id}
+	</update>
+	<update id="updatevaluebyname" parameterType="com.yahelei.domain.autotest.ParameterBean">
+		update yahelei2.yahelei_param set
+		value=#{value} ,update_time=now() where name =#{name}
+	</update>
+	<delete id="deleteParameter" parameterType="java.lang.Integer">
+		delete from yahelei2.yahelei_param
+		where id=#{parameterId}
+	</delete>
+	<insert id="insertParameter" parameterType="com.yahelei.domain.autotest.ParameterBean">
+		insert into yahelei2.yahelei_param(name,description ,value)
+		values(#{name}, #{description}, #{value})
+	</insert>
+</mapper>

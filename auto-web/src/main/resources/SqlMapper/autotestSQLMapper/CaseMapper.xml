@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yahelei.dao.mysql.autotest.CaseMapper">
+	<resultMap id="Caseinfo" type="com.yahelei.domain.autotest.CaseBean" >
+		<result column="id" property="id" jdbcType="INTEGER"/>
+		<result column="num" property="num" jdbcType="INTEGER"/>
+		<result column="project_id" property="project_id" jdbcType="VARCHAR"/>
+		<result column="Interface_id" property="Interface_id" jdbcType="VARCHAR"/>
+		<result column="httpend" property="httpend" jdbcType="VARCHAR"/>
+		<result column="body_type2" property="body_type2" jdbcType="VARCHAR"/>
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP"/>
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP"/>
+		<result column="url" property="url" jdbcType="VARCHAR"/>
+		<result column="precondition" property="precondition" jdbcType="VARCHAR"/>
+		<result column="header" property="header" jdbcType="VARCHAR"/>
+		<result column="expect_sql" property="expect_sql" jdbcType="VARCHAR"/>
+		<result column="sqlid" property="sqlid" jdbcType="VARCHAR"/>
+		<result column="labellist" property="labellist" jdbcType="VARCHAR"/>
+		<result column="body" property="body" jdbcType="VARCHAR"/>
+		<result column="body2" property="body2" jdbcType="VARCHAR"/>
+		<result column="body_type" property="body_type" jdbcType="VARCHAR"/>
+		<result column="sign" property="sign" jdbcType="VARCHAR"/>
+		<result column="signtype" property="signtype" jdbcType="VARCHAR"/>
+		<result column="expect" property="expect" jdbcType="VARCHAR"/>
+		<result column="postcondition" property="postcondition" jdbcType="VARCHAR"/>
+		<result column="method" property="method" jdbcType="VARCHAR"/>
+		<result column="description" property="description" jdbcType="VARCHAR"/>
+		<result column="http" property="http" jdbcType="VARCHAR"/>
+		<result column="host" property="host" jdbcType="VARCHAR"/>
+		<result column="env" property="env" jdbcType="VARCHAR"/>
+	</resultMap>
+	<select id="getcaselist" resultType="java.lang.Integer">
+		select id from yahelei2.yahelei_case where ${canshu} in
+		<foreach collection="x" index="index" item="canshu2" separator=","
+				 close=")" open="(">
+			#{canshu2}
+		</foreach>
+	</select>
+	<select id="getpreconditionnum" resultType="java.lang.Integer">
+		select id from yahelei2.yahelei_case where precondition like #{precondition1} or precondition like #{precondition}
+												 or precondition like #{precondition2} or precondition=#{precondition3} or postcondition like #{Postcondition4}
+	</select>
+	<select id="getcasebylabel" resultType="java.lang.Integer">
+		select id from yahelei2.yahelei_case where project_id=#{projectId} and
+			labellist like #{labelId}
+	</select>
+	<select id="getcaselistbyurl" parameterType="String"  resultMap="Caseinfo">
+		select a.*,b.http,b.host,b.env,c.url,c.method from yahelei2.yahelei_case a,yahelei2.yahelei_project b
+														 ,yahelei2.yahelei_interface c
+		where c.url='${url}'
+		  and a.project_id=b.id
+		  and a.Interface_id=c.id
+	</select>
+	<select id="getdetailbyid" parameterType="String"  resultMap="Caseinfo">
+		select a.*,b.http,b.host,b.env,c.url,c.method from yahelei2.yahelei_case a,yahelei2.yahelei_project b
+														 ,yahelei2.yahelei_interface c where a.id=#{case_id}
+																						and a.project_id=b.id
+																						and a.Interface_id=c.id;
+	</select>
+	<select id="getcaseaddinfo" parameterType="String"  resultMap="Caseinfo">
+		select b.http,b.host,b.env,c.url,c.method from yahelei2.yahelei_interface c
+													 ,yahelei2.yahelei_project b
+		where  c.id=${Interface_id} and b.id=c.project_id;
+	</select>
+	<select id="getcasenum" parameterType="java.lang.Integer"  resultType="java.lang.Integer">
+		select count(*) from yahelei2.yahelei_case where 1=1
+		<if test="Interface_id != null and Interface_id!=0">
+			AND Interface_id = #{Interface_id}
+		</if>
+	</select>
+	<select id="getcaselistbyInterface_id" parameterType="String"  resultMap="Caseinfo">
+		select * from yahelei2.yahelei_case,yahelei2.yahelei_project where 1=1
+		<if test="Interface_id != null and Interface_id.length()!=0">
+			AND yahelei_case.Interface_id = #{Interface_id}
+		</if>
+		and yahelei_case.project_id=#{project_id}
+		and yahelei_project.id=#{project_id} ;
+	</select>
+	<select id="getcaselistbydescription" parameterType="String"  resultMap="Caseinfo">
+		select * from yahelei2.yahelei_case,yahelei2.yahelei_project where 1=1
+		<if test="Interface_id != null and Interface_id.length()!=0">
+			AND yahelei_case.Interface_id = #{Interface_id}
+		</if>
+		and yahelei_case.project_id=#{project_id}
+		and yahelei_project.id=#{project_id}
+		<if test="description != null and description.length()!=0">
+			AND yahelei_case.description = #{description};
+		</if>
+	</select>
+	<update id="updatecase" parameterType="com.yahelei.domain.autotest.CaseBean">
+		UPDATE yahelei2.yahelei_case
+		SET
+			header=#{header},
+			httpend=#{httpend},
+			body=#{body},
+			sign=#{sign},
+			signtype=#{signtype},
+			body_type=#{body_type},
+			labellist=#{labellist},
+			expect=#{expect},
+			postcondition=#{postcondition},
+			precondition=#{precondition},
+			expect_sql=#{expect_sql},
+			sqlid=#{sqlid},
+			body2=#{body2},
+			body_type2=#{body_type2},
+			description=#{description},
+			update_time=now()
+		WHERE id = #{id}
+	</update>
+	<insert id="insertcase" useGeneratedKeys="true" keyProperty="id"
+			parameterType="com.yahelei.domain.autotest.CaseBean">
+		insert into yahelei2.yahelei_case(description,project_id,header,body,body_type,expect,postcondition,body2,sign,signtype,httpend,
+										   precondition,Interface_id,body_type2,expect_sql,sqlid,labellist)
+		values(#{description}, #{project_id}, #{header},#{body},#{body_type},#{expect},#{postcondition},#{body2},#{sign},#{signtype},#{httpend}
+			  ,#{precondition},#{Interface_id},#{body_type2},#{expect_sql},#{sqlid},#{labellist})
+	</insert>
+	<delete id="deletecase" parameterType="java.lang.Integer">
+		delete from yahelei2.yahelei_case
+		where id=#{id}
+	</delete>
+	<select id="getcasebygit" resultType="java.lang.Integer">
+		select a.id from yahelei2.yahelei_case a,yahelei2.yahelei_project b
+		where a.project_id=b.id
+	</select>
+</mapper>

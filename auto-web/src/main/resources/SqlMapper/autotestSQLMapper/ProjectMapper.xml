@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yahelei.dao.mysql.autotest.ProjectMapper">
+
+	<resultMap id="projectinfo" type="com.yahelei.domain.autotest.ProjectBean" >
+		<result column="id" property="id" jdbcType="INTEGER"/>
+		<result column="host" property="host" jdbcType="VARCHAR"/>
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP"/>
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP"/>
+		<result column="http" property="http" jdbcType="VARCHAR"/>
+		<result column="description" property="description" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<select id="getProjectByprojectId" parameterType="java.lang.Integer"  resultMap="projectinfo">
+		select * from yahelei2.yahelei_project
+		where id = #{projectId}
+		order by update_time DESC
+	</select>
+	<select id="getProjectList" parameterType="java.util.Map"  resultMap="projectinfo">
+		select * from yahelei2.yahelei_project
+		where 1=1
+		<if test="host != null and host.length()>=1">
+			AND host like CONCAT('%',#{host},'%')
+		</if>
+		<if test="description != null and description.length()>=1">
+			AND description like CONCAT('%',#{description},'%')
+		</if>
+		order by update_time DESC
+	</select>
+	<select id="getProjectListequal" parameterType="java.util.Map"  resultMap="projectinfo">
+		select * from yahelei2.yahelei_project
+		where 1=1
+		<if test="host != null and host.length()>=1">
+			AND host =#{host}
+		</if>
+		order by update_time DESC
+	</select>
+	<delete id="deleteproject" parameterType="java.lang.Integer">
+		delete from yahelei2.yahelei_project
+		where id=#{projectId}
+	</delete>
+	<insert id="insertproject" parameterType="com.yahelei.domain.autotest.ProjectBean">
+		insert into yahelei2.yahelei_project(host,http,description,common_body,common_header)
+		values( #{host}, #{http}, #{description},#{common_body},#{common_header})
+	</insert>
+	<update id="updateproject" parameterType="com.yahelei.domain.autotest.ProjectBean">
+		UPDATE yahelei2.yahelei_project
+		SET host = #{host},
+			http = #{http},
+			description = #{description},
+		    update_time=now(),
+			common_body=#{common_body},
+			common_header=#{common_header}
+		WHERE id = #{id}
+	</update>
+</mapper>

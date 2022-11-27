@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    org:
+      apache:
+        ibatis:
+          logging: debugger
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

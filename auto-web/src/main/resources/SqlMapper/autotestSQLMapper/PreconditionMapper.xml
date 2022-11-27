@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yahelei.dao.mysql.autotest.PreconditionMapper">
+
+	<resultMap id="preinfo" type="com.yahelei.domain.autotest.PreconditionBean" >
+		<result column="id" property="id" jdbcType="INTEGER"/>
+		<result column="type" property="type" jdbcType="VARCHAR"/>
+		<result column="value" property="value" jdbcType="VARCHAR"/>
+		<result column="value1" property="value1" jdbcType="VARCHAR"/>
+		<result column="value2" property="value2" jdbcType="VARCHAR"/>
+		<result column="value3" property="value3" jdbcType="VARCHAR"/>
+		<result column="action" property="action" jdbcType="VARCHAR"/>
+		<result column="Caselist" property="Caselist" jdbcType="VARCHAR"/>
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP"/>
+		<result column="update_time" property="update_time" jdbcType="TIMESTAMP"/>
+		<result column="description" property="description" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	
+	<select id="getPreconditionList" parameterType="String"  resultMap="preinfo">
+		select a.*,GROUP_CONCAT(b.id) as Caselist from yahelei2.yahelei_precondition a left join
+		yahelei2.yahelei_case b
+		on ( b.precondition like CONCAT("%,",a.id,",%")
+		or b.precondition like CONCAT("%,",a.id,"]")
+		or b.precondition like CONCAT("[",a.id,",%")
+		or b.precondition=CONCAT("[",a.id,"]")
+		or b.postcondition like CONCAT("%(1)",a.id,"\"%"))
+		where 1=1
+		<if test="type != null and type.length()!=0">
+			AND a.type = #{type}
+		</if>
+		<if test="description != null and description.length()!=0">
+			AND a.description = #{description}
+		</if>
+		 group by a.id order by a.update_time DESC
+	</select>
+	<select id="getPrecondition" parameterType="String"  resultMap="preinfo">
+		select * from yahelei2.yahelei_precondition
+		where id=#{id}
+	</select>
+	<update id="updatePrecondition" parameterType="com.yahelei.domain.autotest.PreconditionBean">
+		update yahelei2.yahelei_precondition set
+		description = #{description},type = #{type},update_time=now()
+		<if test="value1 != null and value1.length()!=0">
+			 ,value1 = #{value1}
+		</if>
+		<if test="value1 == null or value1.length()==0">
+			,value1 = ''
+		</if>
+		<if test="value != null and value.length()!=0">
+			, value = #{value}
+		</if>
+		<if test="value == null or value.length()==0">
+			, value = ''
+		</if>
+		<if test="value2 != null and value2.length()!=0">
+			, value2 = #{value2}
+		</if>
+		<if test="value2 == null or value2.length()==0">
+			, value2 = ''
+		</if>
+		<if test="action != null and action.length()!=0">
+			, action = #{action}
+		</if>
+		<if test="action == null or action.length()==0">
+			, action = ''
+		</if>
+		<if test="value3 != null and value3.length()!=0">
+			, value3 = #{value3}
+		</if>
+		<if test="value3 == null or value3.length()==0">
+			, value3 = ''
+		</if>
+		where id = #{id}
+	</update>
+	<delete id="deletePrecondition" parameterType="java.lang.Integer">
+		delete from yahelei2.yahelei_precondition
+		where id=#{id}
+	</delete>
+	<insert id="insertPrecondition" parameterType="com.yahelei.domain.autotest.PreconditionBean">
+		insert into yahelei2.yahelei_precondition(type,description ,value,value1,action,value2,value3)
+		values(#{type}, #{description}, #{value}, #{value1},#{action}, #{value2}, #{value3})
+	</insert>
+</mapper>
